@@ -1,0 +1,100 @@
+---
+title: "Assignment 2 - Probabilistic Models"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+###Name: Andrew Peters
+###Student No: 17232658
+###Course: Biomedical Genomics
+
+*****
+
+####Question 1:
+A patient suffers from an autoimmune condition characterised by intermittent
+‘flare-ups’, followed by periods of reduced symptoms.  When the condition is in the active state (i.e.  during flare-ups) the patient’s blood platelet levels tend to be in the low range (below 100,000 platelets per microlitre of blood), whereas,  generally  her  platelet counts  are  in the  intermediate  (100,000  - 150,000) or normal (150,000 - 450,000) ranges.  The duration of the active and dormant phases are both geometrically distributed with means 2 months and 5 months,  respectively.  The patient’s blood platelet counts have been determined at monthly intervals as shown below. If the probability of platelet levels in the low, intermediate and high ranges is, respectively, 0.7, 0.2, 0.1 in  the  active  state  and  0.2,  0.3  and 0.5  in  the dormant  state,  what  is  the probability that the autoimmune condition is active in month 6?  You may assume  that  each measurement  is  independent  of  all  other  measurements, conditional on  whether  the patient  is  in  the  active  or  dormant  state,  and that the probability that the patient begins in the active state is equal to the stationary probability of the active state.
+
+
+Plate counts in successive months (in 000's per microlitre)
+95, 160, 148, 88, 180, 204, 162, 141  
+
+
+*****
+
+```{r}
+library("HMM")
+#Initialise HMM
+hmm = initHMM(c("Active","Dormant"), c("L","I","N"), transProbs=matrix(c(.5,.2,.5,.8),2),
+emissionProbs=matrix(c(.7,.2,.2,.3,.1,.5),2))
+print(hmm)
+#Sequence of observations
+
+obv <- c(95,160,148,88,180,204,162,141)
+
+observations = c("L","N","I","L","N","N","N","I")
+
+#Calculate backward probablities
+logBackwardProbabilities = backward(hmm,observations)
+print(exp(logBackwardProbabilities))
+```
+
+
+
+
+####Answer:
+
+The time you spend in each state is a geometric distribution with mean = 1/p.
+
+Active state is geometrically distributed with mean = 2 months
+=> p = 1/2 and therefore 1-p = 1/2. 
+
+Dormant state is geometrically distributed with mean = 5 months
+=> p = 1/5 and therefore 1-p = 4/5
+Utilise the forward-backward algorithm to identify the state in month 6.
+
+```{r}
+library("HMM")
+#Initialise HMM
+hmm = initHMM(c("Active","Dormant"), c("L","I","N"), transProbs=matrix(c(.5,.2,.5,.8),2),
+emissionProbs=matrix(c(.7,.2,.2,.3,.1,.5),2))
+print(hmm)
+#Sequence of observations
+
+obv <- c(95,160,148,88,180,204,162,141)
+
+observations = c("L","N","I","L","N","N","N","I")
+
+#Calculate forward probablities
+logForwardProbabilities = forward(hmm,observations)
+print(exp(logForwardProbabilities))
+
+
+#Calculate backward probablities
+logBackwardProbabilities = backward(hmm,observations)
+print(exp(logBackwardProbabilities))
+
+
+#Extract the product of the forward and backwards algorithm:
+F_B <- ForwardAlgo*BackwardAlgo
+F_B
+
+#Find probabilty of active state in month 6 (F_B[1:10] = 1-5 active & 1-5 Dormant states):
+Active6 <-F_B[11]
+Active6
+
+#Calaculate the probability of being in the active state in month 6.
+#This is achieved by adding the Low, Intermediate and High probabilities in both states
+#before getting the product of these numbers. 
+L <- 0.7 + 0.2
+I <- 0.2 + 0.3
+N <- 0.5 + 0.1
+
+x <- L*I*N
+
+#Divide tthese figures to get the probability that the autoimmune condition is active in month 6:
+Answer <-Active6/x
+Answer
+```
+Therefore, the probability that the autoimmune condition is active in month 6 is "3.310037e-05."
+
+
