@@ -1,0 +1,467 @@
+---
+title: "MA5108 - Assignment 4"
+output:
+  html_document: default
+  pdf_document: default
+header-includes:
+  - \hypersetup{colorlinks=true, linkcolor=blue}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+$~$
+
+Answer both questions within this R markdown document, and submit via Blackboard by no later than 23:59 15th December 2017, ensuring that the document has your name and ID number before the answer section. Make as much effort as possible to present your results as professionally as possible (e.g. multiple graphs in the same plot window, correct labels and titles, use of colour etc.). Where appropriate, hints are provided.
+
+####Name: Andrew Peters
+####Student ID: 17232658
+####Module: Statistical Programming with R
+
+
+
+$~$
+
+You are required to do the following:
+
+ - compute and compare Kaplan-Meier estimators for both cohorts and test the hypothesis that there is a discernable difference in each cohort's survival function.
+
+```{r}
+rad_dat <- read.csv("irradiation.csv",header=T)
+head(rad_dat)
+attach(rad_dat)
+summary(Treatment)
+summary(Time)
+
+library(splines)
+library(survival)
+
+#Create seperate data frames for control and treatment treatment only
+Control_only <- rad_dat[rad_dat$Treatment=="Placebo",]
+Treat_only <- rad_dat[rad_dat$Treatment=="GF",]
+
+#Generate log rank score
+log_rank<-survdiff(Surv(rad_dat$Time)~rad_dat$Treatment)
+log_rank
+
+
+#Generate therapy against the placebo fit over the duration of the trial
+sfit<- survfit(Surv(rad_dat$Time)~rad_dat$Treatment)
+
+#Create associated Kaplan-Meier curve model
+plot(sfit, lty=c("solid","dashed"),col=c("black","blue"),xlab="Survival Times in Days",ylab="Survival Probability")
+title("GF & Placebo Survival Post Radiotherapy Treatment")
+legend("topright",c("GF Treatment","Placebo"),lty=c("solid","dashed"),col=c("black","blue"))
+
+
+```
+
+###Based on the computed log ranked test, the Chi_squared test statistic generated = 12.6. This figure coincides with a p-value = 0.000392, and this greatly exceeds the alpha threshold = 0.05, meaning that there is a significant difference in the data. We can therefore hypothesise that the administration of growth factors enhances survival outcomes post radiotherapy when compared with placebo administration. This notion is graphically represented in the generated "Kaplan-Meier" survival graph above, which plots "Survival Probability" on the Y-axis against "Survival Times in Dayes" on the x-axis. It is clearly visible that as the GF treatment line occupies the extreme right of the graph, that it enhances survival times when compared with the placebo, whereby no subjects have survived passed Day 50.
+
+
+- find the times for 50% morbidity for both cohorts 
+
+```{r}
+#Treatment
+#Sample size = 20, and 50% of this number is required to proceed
+20*0.5
+
+#Therefore pick the time of the 10th value of a numerically sorted treatment cohort
+treat_morb <- sort(Treat_only$Time)
+
+#Print this out
+treat_morb
+
+#Pick out the 10th value
+treat_morb[10]
+
+
+```
+###Therefore the 50% morbidity rate in the treatment group is after 51 days. This means that 50% of the mice administered with the GF treatment after radiation dosage are deceased at day 51.
+
+```{r}
+#Treatment
+#Sample size = 20, and 50% of this number is required to proceed
+20*0.5
+
+#Therefore pick the time of the 10th value of a numerically sorted placebo cohort
+cont_morb <- sort(Control_only$Time)
+
+#Print this out
+cont_morb
+
+#Pick out the 10th value
+cont_morb[10]
+
+
+
+```
+
+- comment on the results of the analysis
+
+
+###Therefore the 50% morbidity rate in the placebo group is after 25 days.This means that 50% of the mice administered with the placebo treatment after radiation dosage are deceased at day 25.
+
+###When comparing the 50% morbidity rates across both control and treatment cohorts, it is evident that the best survival outcome is associated with the treatment group (51>25)
+
+###Therefore based on the above "Kaplain-Meir" curve and the survival data, it is evident that the treated samples have better survival outcomes post irradiation exposure when compared with the placebo cohort.
+
+
+Look over the manuscript referenced [https://www.ncbi.nlm.nih.gov/pubmed/19956666](https://www.ncbi.nlm.nih.gov/pubmed/19956666), and interpret in your own words the information shown on Figure 2. Compare their results to your own.
+
+
+###In the study, the mitogen (growth factor) R-spondin1 is administered to replenish intestinal cells post radiation treatment as this would help regenerate the irradiated cells and hence enhance survival outcomes. The aim of this administration is to prevent Radiation-induced gastrointestinal syndrome (RIGS). The "R-spondin" was administered via a viral vector. In thecontrol cohort, the mice were administered E.coli Lacz (AdLacz). The PBS treated cohort is another control cohort administered "phosphate buffered saline" which is just a buffer solution commonly used in biological research. In the graph, 3 seperate survival lines with red, green and blue representing the R-spondin1, AdLacz and PBS cohorts respectively. Even though the maximum time after radiation dose that can be visualised on the figure is 30 days, you can see that it somewhat approximates the data I generated earlier. This is evident as the growth factor cohort survival line exists to the extreme right of the graph, which mimics that of the earlier generated graph and is indicative of longer survival times. However, the two control cohorts have poorer survival outcomes than the graph described earlier, as both cohorts have a 100% mortality rate at around day 15. This is becaue these mice were subject to whole body radiation, whereby A 10 Gray dose of radiation would be considered a lethal dose. In this study they used a 10.4 radiation dose.
+
+###For part(B) of the graph, the experimental group wanted to induce primarily a radiation-induced gastro-intestinal injury in mice, as the radiation dose was secondary to the hematopoeitic and gastrointestinal syndrome. Therefore, this time instead of whole body irradiation, they focused on abdominal irradiation (AIR). On this graph different irradation doses are applied to the abdomen (12Gy, 14Gy, & 16Gy) to both the R-spondin-1 and AdLacz mice. Again based on the survival curves, it is evident the treated groups have better survival outcomes. The only exception to this is the 16Gy R-spondin1 irradiated cohort and this perhaps due to the severely elevated radiation doses. For both cohorts, it is evident that lower doses correlate with better survival outcomes, with the treated R-spondin1 cohort exposed to 12Gy radiation having the best survival outcome. I feel that this graph is somewhat different to the one I generated earlier in terms of morbidity as all the "control" group are deceased after approximately 15 days. In addition, the treated cohort have worse survival outcomes after 30 days, however in the data we used the mice were subject to only 10 Gy urradiation and this is a possible cause for a greater morbidity rate.
+
+
+
+$~$
+
+
+You are required to do the following:
+
+ - visualize the Ki-67 precentages in a boxplot, and determine the mean, sd and median values for this marker; comment on what you see.
+ 
+```{r}
+
+dat <- read.csv("ki67(1).csv",header=T)
+attach(dat)
+
+#Ki-67 Boxplot
+boxplot(dat$gene, xlab='Ki-67 expression Data',ylab='Precentage of Ki-67 Expression', col=c("blue"))
+title(main="Boxplot of Perecentage Ki-67 staining variaion")
+
+#Ki-67 Summary Statistics
+gene_mean <- mean(dat$gene)
+gene_sd <- sd(dat$gene)
+gene_median <-median(dat$gene)
+
+rbind(gene_mean, gene_sd, gene_median)
+```
+###This data suggests that there is a big varaition of Ki-67 expression Data across all the tumour sample. This is indicated by a "wide" box generated in the boxplot (& extended "arms" above and below the plot), aswell as the large standard decviation values from the summary statistics.
+
+
+ 
+ 
+
+
+ 
+ 
+- perform a similar operation for the 3 miRNA datasets - what is evident from the combined boxplots? 
+
+```{r}
+#miRNA1 boxplot
+boxplot(dat$miRNA1, xlab='miRNA1 expression Data',ylab='Precentage of miRNA1 Serum Concentration', col=c("green"))
+title(main="Boxplot of Perecentage miRNA1 serum concentration")
+
+#miRNA1 Summary statistics
+mi1_mean <- mean(dat$miRNA1)
+mi1_sd <- sd(dat$miRNA1)
+mi1_median <-median(dat$miRNA1)
+
+rbind(mi1_mean, mi1_sd, mi1_median)
+```
+
+```{r}
+#miRNA2 boxplot
+boxplot(dat$miRNA2, xlab='miRNA2 expression Data',ylab='Percentage of miRNA2 serum concentration', col=c("purple"))
+title(main="Boxplot of Perecentage miRNA2 serum concentration")
+
+#miRNA2 Summary statistics
+mi2_mean <- mean(dat$miRNA2)
+mi2_sd <- sd(dat$miRNA2)
+mi2_median <-median(dat$miRNA2)
+
+rbind(mi2_mean, mi2_sd, mi2_median)
+```
+
+```{r}
+#miRNA3 boxplot
+boxplot(dat$miRNA3, xlab='miRNA3 expression Data',ylab='Precentage of Serum Concentration', col=c("violet"))
+title(main="Boxplot of Perecentage miRNA1 serum concentration")
+
+#miRNA3 Summary statistics
+mi3_mean <- mean(dat$miRNA3)
+mi3_sd <- sd(dat$miRNA3)
+mi3_median <-median(dat$miRNA3)
+
+rbind(mi3_mean, mi3_sd, mi3_median)
+
+
+```
+
+
+
+```{r}
+boxplot(dat$miRNA1, dat$miRNA2, dat$miRNA3, xlab='miRNA expression Data',ylab='Precentage of Serum Concentration', col=c("green", "purple", "violet"))
+title(main="Boxplot of Perecentage miRNA serum concentration")
+```
+
+###Based on the summary statistics generated or each miRNA, the mean concetrations of the miRNA's all have different values and therfore exist in different abundances in the serum. The standard deviations steadily decrease from miRNA1 - miRNA3, as indicated by the width of the boxplots generated. In terms of the boxplots, the mean is graphically represented by the centre of each box generated, and the standard deviation is evident by the extension of the "arms", above and below the boxplot. 
+
+- perform an ANOVA test to confirm (or refute) differences between the 3 mirRNA datasets - comment on the results determined.
+
+```{r}
+
+#Remove the Grade associated column
+dat2 <- dat[,-1]
+
+#Remove the Ki-67 associated column
+dat3 <- dat2[,-1]
+sdat <- stack(dat3)
+
+attach(sdat)
+
+
+
+#Contains all the summary statistics from each variable
+summary(sdat)
+
+boxplot(values ~ ind, xlab='miRNA Expression Data',ylab='Amount in Serum Concentration', col=c("red","green","purple"))
+
+
+result <- oneway.test(values ~ ind, var.equal=TRUE)
+result
+
+
+
+```
+    
+###The results are as follows: F = 23.734, num df = 2, denom df = 246, p-value = 3.76e-10. Therefore at an alhpa level = 0.05, the null hypothesis is emphatically rejected in favour of the alternative hypothesis. This is because the p-value "3.76e-10" is extremely small. Therefore, there is a statistical signifcant difference in the expression data between the 3 miRNA groups.
+
+
+- assuming there is evidence to do so, perform t-tests between the miRNA datasets to assess differences in miRNA expression - comment on the results of this/these assays.
+
+```{r}
+var.test(dat$miRNA1,dat$miRNA2)
+t.test(dat$miRNA1,dat$miRNA2,pair =TRUE)
+
+
+var.test(dat$miRNA1,dat$miRNA3)
+t.test(dat$miRNA1,dat$miRNA3)
+
+var.test(dat$miRNA2,dat$miRNA3)
+t.test(dat$miRNA2,dat$miRNA3)
+
+```
+###If F-test is not significant, then the welch t-test is undertaken. Consequently, if the F-test is signifcant, the paired t-test is undertaken. Welsh's t-tests are undertaken as all the data have different underlying variances and therefore combines variances in proportion to their differences, and the F-test can determine this. At an alpha level = 0.05, the first t-test comparing the miRNA1 & miRNA2 cohorts is signifcant, and therefore a paired t-test is implemented. This exhibits a "0.05234" p-value, and therefore rejected at the alpha level = 0.05. This suggests that these two cohorts are statistically signifcant. The F-test statistic is not signifcant in the final 2 fisher test cohorts (between miRNA1 & miRNA3 and between miRNA2 & miRNA3). Therefore, on these cohorts, a Welch Two Sample t-test was conducted. For both of these cohorts, the associated p-values from the Welch-test were 6.149e-10 and 1.358e-07 respectively. And therefore, at the alpha = 0.05 level, both these null hyothesis' are rejected, implicating that they are significantly different cohorts. These statistically differences would be expected based on the statisitcal significance of the one-way ANOVA test conducted earlier.
+
+
+ - generate scatterplots for each miRNA individually against Ki-67; comment on what you see.
+
+```{r}
+
+plot(dat$gene, dat$miRNA1, main="Scatterplot of miRNA1 against Ki-67",
+   xlab="Ki-67 Expression Data ", ylab="miRNA1 Staining Data ", col= "orange",pch=1)
+
+cor(dat$gene,dat$miRNA1)
+
+plot(dat$gene, dat$miRNA2, main="Scatterplot of miRNA2 against Ki-67",
+   xlab="Ki-67 Staining Data ", ylab="miRNA2 Expression Data ", col= "purple",pch=1)
+
+cor(dat$gene,dat$miRNA2)
+
+plot(dat$gene, dat$miRNA3, main="Scatterplot of miRNA3 against Ki-67",
+   xlab="Ki-67 Staining Data ", ylab="miRNA1 Expression Data ", col= "green",pch=1)
+
+cor(dat$gene,dat$miRNA3)
+
+
+
+```
+###In alll the graphs, it is evident that there is a massive variation of miRNA expression against Ki-67 expression. This is evident by the catastrophic derrangement of "dots" on the boxplots that seem to follow no common correlation. The numeric correlation coeeficient values were also calculated to support this lack of correlation. The data had values of 0.4042181, 0.3235837 & 0.2210803 values respectively, all indicative of low correlation. Therefore, it is visually and numerically obvious that the Ki-67 and all miRNA's expression are independent of each other.
+ 
+ - based on the trend you can see in the previous step, implement linear fit(s) on those Ki-67/miRNA scatterplots that look informative; assess the goodness-of-fit(s), and recreate plots with best-fit lines overlaid.
+
+```{r}
+
+plot(dat$gene, dat$miRNA1, main="Scatterplot of miRNA1 against Ki-67",
+   xlab="Ki-67 Staining Data ", ylab="miRNA1 Expression Data ", col= "orange",pch=1)
+abline(lm(dat$miRNA1~dat$gene), col="red") # regression line (y~x)
+lines(lowess(dat$gene,dat$miRNA1), col="blue") # lowess line (x,y)
+
+cor(dat$gene,dat$miRNA1)
+summary(lm(dat$miRNA1~dat$gene))
+
+plot(dat$gene, dat$miRNA2, main="Scatterplot of miRNA2 against Ki-67",
+   xlab="Ki-67 Staining Data ", ylab="miRNA2 Expression Data ", col= "purple",pch=1)
+abline(lm(dat$miRNA2~dat$gene), col="red") # regression line (y~x)
+lines(lowess(dat$gene,dat$miRNA2), col="blue") # lowess line (x,y)
+
+cor(dat$gene,dat$miRNA2)
+summary(lm(dat$miRNA2~dat$gene))
+
+plot(dat$gene, dat$miRNA3, main="Scatterplot of miRNA3 against Ki-67",
+   xlab="Ki-67 Staining Data ", ylab="miRNA1 Expression Data ", col= "green",pch=1)
+abline(lm(dat$miRNA3~dat$gene), col="red") # regression line (y~x)
+lines(lowess(dat$gene,dat$miRNA3), col="blue") # lowess line (x,y)
+
+cor(dat$gene,dat$miRNA3)
+summary(lm(dat$miRNA3~dat$gene))
+
+```
+
+###Based on the goodness-of-fit trendline, it is clearly visible that there are many points not explained in the trendline, as there are massive deviations from this trendline in the data. These devaitions are refered to as residuals and their large deviations are indicated by the large and diverse residual values in the summary section that accompany each graph. The summary statistics also show statistical significance for each plot when comparing the coefficients, which numerically confirms the diverse and independent nature of the miRNA expression with Ki-67 expression.
+
+At this stage, comment on what you can say about the relationship between the Ki-67 positive percentage values and normalized quantification of the three miRNAs in the patient dataset.
+
+
+###I would say to stay consistent with the data collected. One data cohort has expression values (miRNA's) whereas the Ki-67 figures aren't raw expression values, but percentages of positively stained nuclei. Therefore, perhaps RNA quantification assays in the tissue of interest should be conducted on Ki-67 instead of histological staining as the data is inconsistent and incomparable. This is evident by the diverse nature of the boxplots created.
+
+
+In the original datafile, we also have a column corresponding to the grade of the tumour in each case, namely grade I, II and III. Put crudely, these are metrics describing the differentiation state of the biopsy sample, with the most differentiated (grade III) having the worst prognosis. 
+
+Take the most promising miRNA covariate from the Ki-67 study based on your linear regression study previously performed, and segment it into three separate sub-cohorts based on grade status.
+
+Then,
+
+ - plot boxplots of the miRNA concentration as function of these subcohorts, one for grade I, II and III.
+
+
+###Based on the R correlation coffecient values and above scatter plots generated, the miRNA3 covariate has the greates correlation to the Ki-67 dataset. is is because the points plotted show less deviation from the trendline (residuals = 0.00569)  
+
+```{r}
+#This creates a boxplot for each tumour grade
+boxplot(miRNA3[which(grade=='1')],miRNA3[which(grade=='2')],miRNA3[which(grade=='3')],xlab='Tumour Grade',ylab='miRNA3 expression', col=c("yellow","orange", "red"))
+axis(1,at=1:3,labels=c("1","2","3"))
+title(main="Boxplots for miRNA3 Expression against Tumour Grade")
+
+grade1_only <- dat[dat$grade=="1",]
+
+miRNA3_1_mean <-mean(grade1_only$miRNA3)
+miRNA3_1_sd <-sd(grade1_only$miRNA3)
+miRNA3_1_median <-median(grade1_only$miRNA3)
+
+rbind(miRNA3_1_mean,miRNA3_1_sd,miRNA3_1_median)
+
+
+grade2_only <- dat[dat$grade=="2",]
+
+miRNA3_2_mean <-mean(grade2_only$miRNA3)
+miRNA3_2_sd <-sd(grade2_only$miRNA3)
+miRNA3_2_median <-median(grade2_only$miRNA3)
+
+rbind(miRNA3_2_mean,miRNA3_2_sd,miRNA3_2_median)
+
+
+grade3_only <- dat[dat$grade=="3",]
+
+miRNA3_3_median <-mean(grade3_only$miRNA3)
+miRNA3_3_sd <-sd(grade3_only$miRNA3)
+miRNA3_3_median <-median(grade3_only$miRNA3)
+
+rbind(miRNA3_3_median,miRNA3_3_sd,miRNA3_3_median)
+
+```
+
+### The summary statistics and boxplots indicate that for miRNA3, they have similar data for gene expression patterns for tumour grade's 1 & 2. However, as the tumour develops to stage 3, there is an evident elevation of gene expression as indicated by the box plots and summary statistics for miRNA3. Therefore the miRNA data appears to form somewhat of a correlation with expression and advancing grade, whereas the miRNA3 data seems to be similar for grades 1 and 2, but substantially elevate for grade 3 tumours.
+
+
+ - implement an ANOVA test to confirm - or refute - differences amongst the distributions as a function of grade.
+ 
+```{r}
+#Following this up with simply analysing the relationship between the miRNA1 and ki-67 cohort.
+
+anova(lm(dat$miRNA3~dat$gene))
+```
+
+###The data from the ANOVA shows a statistical signifcance between the Ki-67 staining data and the miRNA 3 data at an alpha level = 0.05. This is the case as the associated p-value produced is "0.04459".However, if a more stringent alpha threshold was utilised, to control for the false discovery rate (i.e. alpha = 0.01), the alternative hypothesis would in fact be rejected, and perhaps this notiion should be considered.
+
+ - follow this up by pair-wise t-tests between each grade subcohort.
+ 
+```{r}
+
+t.test(dat$gene,dat$miRNA3,paired =TRUE)
+
+```
+###This paired-test has a massively statistically difference between the Ki-67 and miRNA3 data at the alpha = 0.05. This is because the p-values is < 2.2e-16 and therefore the null hypothesis, that both variables are similar is rejected.
+
+ 
+ 
+Finally create boxplots of Ki-67 percentage segmented again on grade status.
+
+```{r}
+
+#This creates a boxplot for each tumour grade
+boxplot(gene[which(grade=='1')],gene[which(grade=='2')],gene[which(grade=='3')],xlab='Tumour Grade',ylab='Ki-67 Expression', col=c("yellow","orange", "red"))
+axis(1,at=1:3,labels=c("1","2","3"))
+title(main="Boxplots for Ki-67 Staining Percentage against Tumour Grade")
+
+
+
+grade1_mean <-mean(grade1_only$gene)
+grade1_sd <-sd(grade1_only$gene)
+grade1_median <-median(grade1_only$gene)
+
+rbind(grade1_mean,grade1_sd,grade1_median)
+
+
+
+grade2_mean <-mean(grade2_only$gene)
+grade2_sd <-sd(grade2_only$gene)
+grade2_median <-median(grade2_only$gene)
+
+rbind(grade2_mean,grade2_sd,grade2_median)
+
+
+
+
+grade3_mean <-mean(grade3_only$gene)
+grade3_sd <-sd(grade3_only$gene)
+grade3_median <-median(grade3_only$gene)
+
+rbind(grade3_mean,grade3_sd,grade3_median)
+
+```
+###As is evident from the above data, as the grade increases, the mean,  sd and median values associaed with Ki-67 all increase.
+
+
+Based on this work, what conclusions would you draw on the viability of using one or more of the miRNA's as markers for breast cancer? And what conclusions would you draw about the use of Ki-67 itself as a marker when compared against the pathologist derived grade scores? *Briefly* conclude this with a discussion of your assessment of the current status of miRNAs as diagnostic biomarkers for cancer, based on a overview of the most recent literature on this topic (i.e. use **PubMed**!)
+
+
+### When using one or more of the miRNA's as markers for breast cancer, they are good indicators for grade tumour scores. This is implicated in the data a for all miRNA's, the expression level increases with advancing grade. The expression levels are generally similar for grades 1 & 2, but are elvated for grade 3 and can therefore be a good potential biomarker in defining highr grade tumours. In terms of the Ki-67 staining data, there is an obvious correlation based on the above boxplot, that relates staining intensity to grade score. This is observed beacuse as the tumour grade increases, so does the expression score, illustrated with a linear progression from left to right of the graph. In saying this, I don't believe relationship testing between the Ki-67 positive percentage values and normalized quantification of the three miRNAs in the patient dataset should be undertaken. This is primarily because the Ki-67 data exists as abstract percentage values and not of expression data. Therefore, perhaps if the Ki-67 data can be quantified, then correlations and analysis may be undertaken between these two variables. 
+
+
+###The role of microRNAs (miRNAs) in melanoma biology could be key. Melanoma is the leading cause of skin cancer deaths in the United States, and its incidence has been rising steadily for the past 30 years (Aftab et al, 2014). miRNA expression profiling has identified several miRNAs that play a crucial role in melanoma cell proliferation, migration, and invasion, as well as miRNAs involved in apoptosis and in the immune response. Therefore, miRNA's can serve as potential roles as diagnostic and prognostic biomarkers of this disease. oss, et. al 2017)
+
+###Another cancer, Osteosarcoma also appears to have miRNA concentration correlations with that of the cancer. A study conducted by Nake & colleagues undertook miRNA expression profiling on a patient cohort. In their results, a total of 56 miRNAs were upregulated and 164 miRNAs were downregulated in osteosarcoma samples when compared to control plasma samples. miR-21, miR-221 and miR-106a were selected for further validation based on their known biological importance, and could perhaps prove key diagnostic biomarkers in future osteosarcoma studies.
+
+###In terms of breast cancer, Paszek & colleagues performed miRNA expression profiling on triple negative breast cancers, is this represents a cohort that requires biomarker discovery to advance treatment methods. They obtained promising resuts, with miR-190a, miR- 136-5p and miR-126-5p expression significantly reduced and expression of miR-135b-5p and miR-182-5p was significantly increased. Therefore, after further analysis and validation, perhaps these can be successful diagnostic markers in determing triple negative breast cancers. 
+
+###Conclusion: Therefore, it is evident that the future is bright for miRNA cancer diagnostics. Various miRNA's have been identified to have statistically signifcant expression profiles in a a range of cancers, such as melanoma's, osteosarcoma'e and more pertinently triple negative breast cancers. Perhaps these experiments should undergo further analysis and validation, in order to truly characterise them as genuine biomarker's that would aid in the diagnosis, and subsequently help treatment, in many cancer types.
+
+
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
