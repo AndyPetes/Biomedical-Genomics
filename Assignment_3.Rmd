@@ -1,0 +1,66 @@
+---
+title: "Probabalistic Models foMolecular Biology - Assignment 3"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+**Name:** Andrew Peters
+
+**Student ID:** 17232658
+
+****
+
+Write a programme in the language of your choice that will produce a maximum likelihood estimate of the genetic distance between a pair of (aligned) DNA sequences under the Kimura 2-parameter model of nucleotide substitution (this model has separate parameters for transition and transversion mutations but equal equilibrium frequencies for all nucleotides). Your code should  include  steps  to  scale  the  generator  matrix  appropriately  and  calculate transition probability matrices as a function of the genetic distance.
+You can make use of optimisation libraries (e.g.  optim in R) to obtain the maximum likelihood estimate of the genetic distance, given a pair of aligned input sequences (in a format of your choice). Test your function on the pair of sequences below using the formula.
+```{r}
+library(expm)
+library(stats)
+
+
+#Define the two genetic sequences
+s1 <- c('A', 'G', 'T', 'C', 'C', 'A', 'T', 'G', 'A', 'T')
+s2 <- c('A', 'C', 'G', 'T', 'C', 'G', 'T', 'G', 'C', 'T')
+
+#Define the Function
+my_func = function(tkappa){
+  
+  #Define the "k" and "t" variables for the function
+  k=tkappa[1]
+  t=tkappa[2]
+  
+  #Let Transitions = 1
+  #Generator matrix
+  #Gen <- matrix(c((-2-k), 1, k, 1, 1, (-2-k), 1, k, k, 1, (-2-k), 1, 1, k, 1, (-2-k)), 
+  #nrow=4, ncol=4, byrow = TRUE)
+  
+  
+  #Scale Matrix so to get -1 on the diagonal
+  #Therefore divide every non-diagonal entry by "(2+k)""
+  Scaled <-matrix( c(-1,1/(2+k),k/(2+k),1/(2+k),1/(2+k),-1,1/(2+k),k/(2+k),
+                     k/(2+k),1/(2+k),-1,1/(2+k),1/(2+k),k/(2+k),1/(2+k),-1), 
+                   nrow=4, ncol=4, byrow = TRUE) 
+  
+  #Get Transition Probability Matrix
+  Pt <- expm(Scaled*t)
+  
+  #Define the row and column names
+  rownames(Pt) <- c('A', 'C', 'G', 'T')
+  colnames(Pt) <- c('A', 'C', 'G', 'T')
+  
+  #Create a "for" loop
+  product <- 1
+  for (i in 1:length(s1)){
+  product <- product * Pt[s1[i], s2[i]]
+}
+ return(product)
+} 
+
+#Optimise the function
+optim(c(1,1), my_func, control=list(fnscale=-1))
+
+```
+Therefore, the initial values for the parameters to be optimized over are kappa = "1.6279957" & t = "0.8309749".
+
+Therefore according to the functions, the maximum likelihood estimate of the genetic distance, given the above pair of aligned input sequences is: "4.21875e-06".
+
