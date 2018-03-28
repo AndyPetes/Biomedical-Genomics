@@ -1,0 +1,212 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# **Assignment 2**
+
+Name: Andrew Peters  
+ID: 17232658  
+Module: "Statistical Computing with R"  
+Date: 25/09/2017
+
+***
+
+**Question 1(a)**
+
+
+Explain what each argument in the command stands for:
+
+pwr.t.test(n = NULL, d = NULL, sig.level = 0.05, power = NULL,  
+type = c("two.sample", "one.sample", "paired"), 
+alternative = c("two.sided", "less", "greater"))
+
+"n" denotes the number of observations (per sample).
+
+"d"	denotes the effect size which indicates whether or not the difference between two groups' averages is large enough to have practical meaning.
+
+"sig.level"	denotes the Significance level, or the Type I error probability. This is the probability of rejecting the null hypothesis when it is true. The lower the significance value, the lower the probability that risk is involved when considering a statistical significance.
+
+"power" denotes the Power of test, which is also reffered to as "1"" minus the Type II error probability. It can be considered the probability of rejecting the null hypothesis when the alternative hypothesis is in fact the true hypothesis.
+
+"type" denotes the type of t test, i.e. one- two- or paired-samples.
+
+"alternative" is a character string specifying the alternative hypothesis and must be one of "two.sided", "greater" or "less". If a two-sided test, then the hypothesis that is being tested can  be sufficiently higher or lower to be significant, i.e. if there's a significant change (higher or lower) in the data. In a lower tailed test, then the data must be sufficiently smaller to infer a statistical significance and the opposite is true for an upper-tailed test.
+
+Testostorone serum Concentration = 540
+Standard Deviation = 180
+If treatment works, <50 concentration will result
+What is the optimum number of volunteers, assuming an 80% power,
+efficacy = 5% level of significance
+Assume standard deviation is associated with castration response
+
+
+Perform a power calculation to determine the optimum number of volunteers to include in the study, assuming the study is powered to 80% and efficacy is assessed at the 5% level of significance:
+
+**Question 1(b)**
+```{r}
+library(pwr)
+
+
+sd <- 180
+e_s <- (540 - 50)/sd
+pwr.t.test(n = NULL, d = e_s, sig.level = 0.05, power = 0.8)
+
+```
+The sample size required ("n") is extremely small, as "n" = 3.4, or 4 individuals. The sample size required is small as the effect size is large and the power of the test isn't too extensive.
+
+
+Actual studies indicate the standard deviation of the measured testosterone blood concentration for castration-like conditions is typically 10% of the measured value - so for a 50 ng/dl cutoff, this would be 5 ng/dl. Given that the differences in standard deviations require a modified calculation of the effect size, re-calculate the optimum number of volunteers for the same power and significance level.
+
+**Question 1(c)**
+```{r}
+
+d1 <- 540
+d2 <- 50
+s1 <- d1
+s2 = d2*0.1
+s_error = sqrt((s1^2 + s2^2)/2)
+e_size <- (d1 - d2)/s_error
+pwr.t.test(d = e_size, sig.level = 0.05, power = 0.8)
+
+```
+The optimum number of samples required, per sample group, is "10.58" or 11 individuals. This figure is larger than the previous test, due to the smaller "effect size" generated from the pooling of the standard deviations of sampling two means that have differing standard deviations.  
+
+
+Finally, we might imagine that we would want to be as stringent as possible in avoiding false negatives - if we enrolled 10 volunteers for each group, and tested the hypothesis that the drug had no effect at the 5% significance level, how powered would our experiment be? What about at the 0.1% level?
+
+**Question 1(d)(i)**
+```{r}
+
+pwr.t.test(n = 10, d = e_size, sig.level = 0.05, power = NULL)
+```
+The power of the test under these parameters is: "0.77". 
+
+**Question 1(d)(ii)**
+```{r}
+
+pwr.t.test(n = 10, d = e_size, sig.level = 0.001, power = NULL)
+```
+The power of the test under these parameters is: "0.20". The power is less with a smaller significance value. If statistical power is high, the probability of making a Type II error, or concluding there is no effect when, in fact, there is one, reduces.
+
+Clinical trials of LHRH agonists typically involve between 50 and 60 patients per sample group. Judging on the data we generated from our models, this is more than the required optimum population to sample from. This is evident in the initial question, whereby a sample size of 3.403697 is required for a power of "0.8" and a significance level of 5%, for testing the LHRH agonists protocol. This small sample size would largely be due to the relatively low power value (as increasing the sample size("n") increases the power), coupled with a realtively large effect size value.
+
+
+**Question 2(a)**
+
+pchisq(q, df, ncp = 0, lower.tail = TRUE, log.p = FALSE)
+
+"q" represnts the vector of quantiles, and is given by our generated test statistic.
+
+"df" represents the degrees of freedom, or the number of values in the final calculation of a statistic that are free to vary.
+
+"log.p" if "TRUE" means that the probabilities "p" are given as "log(p)".
+
+"lower.tail", when "TRUE" represents when probabilities are less than or equal to an "x" value.
+
+In our model, the "lower.tail" arguement is equal to "false". By setting this parameter to "false", you can generate the probability of the test statistic of lying within the right tail, and therefore make statistical inferences based on this data.
+
+
+Out of 2014 sites, 623 were found within exons, and 1456 were found outside exons
+
+100000 regions, 45236 insertions, and 54764 outside exon regions.
+
+**Question 2(b)**
+```{r}
+
+
+Obs <- c(623, 1456)
+Num_Obs <- sum(Obs)
+
+
+Exp <- c(45236/100000, 54764/100000)*Num_Obs
+
+
+t_stat <- sum((Obs-Exp)^2/Exp)
+
+#Print test statistic
+t_stat
+
+
+pval <- pchisq(t_stat, df=1, lower.tail = FALSE)
+
+#Print p-value
+pval
+
+
+```
+The p-value generated from this data, is extremely small (1.835622e-44). Therefore, there is strong statistical evidence to reject the null hypothesis - that retroviral insertion takes place at equal randomness (or no bias) in gene coding regions and non-coding regions, in favour of the alternative hypothesis - that retroviral insertion takes place at a non-random pattern (bias) between gene coding regions and non-coding regions.
+
+
+**Question 3(a)(i)**
+What is meant by a contingency table?
+This is a tabular representation of the distribution of one column variable with another row variable.
+
+**Question 3(a)(ii)**
+What the basis for Fisher's Exact Test is: when "n" or the sample size is small, i.e. in the 10s or 100s.
+
+**Question 3(a)(iii)**
+How it can be used to to test of a 'Goodness-of-fit'?
+It can be used to test a "Goodness-of-fit" as the differences between variables follow a distribution (hypergeometric), under the null hypothesis. Therefore, using data, a test statistic can be generated and compared with this distribution, to infer statistical significance or not.
+
+**Question 3(b)**
+DNA repair 
+ - Male: 2 altered, 15 not
+ - Female: 26 altered, 182 not
+
+```{r}
+DNA_Male <- c(2,15)
+DNA_Female <- c(26,182)
+tab <- cbind(DNA_Male,DNA_Female)
+fisher.test(tab, alternative = "two.sided")
+```
+Here the p-value is equal to "1", and therefore we can conclusively reject the alternative hypothesis in favour of the null. Therefore gene's involved in the DNA repair pathway between the male and famle population groups have similar mutational profiles, and don't differ that much. 
+
+
+
+Homology Recombination
+ - Male: 0 altered, 17 not
+ - Female: 8 altered, 200 not
+
+```{r}
+HR_Male <- c(0,17)
+HR_Female <- c(8,200)
+tab <- cbind(HR_Male,HR_Female)
+fisher.test(tab, alternative = "two.sided")
+
+
+```
+Here the p-value is equal to "1", and therefore we can conclusively reject the alternative hypothesis in favour of the null. Therefore gene's involved in the Homology Recombination pathway between the male and famle population groups have similar mutational profiles, and don't differ that much.
+
+
+
+PI3K/Akt/mTOR
+ - Male: 5 altered, 12 not
+ - Female: 126 altered, 82 not
+
+```{r}
+Pathway_Male <- c(5,12)
+Pathway_Female <- c(126,82)
+tab <- cbind(Pathway_Male,Pathway_Female)
+fisher.test(tab, alternative = "two.sided")
+
+```
+Here the p-value is equal to "0.01921", and therefore at a significance value of alpha = 0.05, we can reject the null hypothesis in favour of the alternative. Therefore gene's involved in the PI3K/Akt/mTOR pathway between the male and famle population groups have differing mutational profiles, with a greater mutational rate in females as is evident from the initial data. 
+
+
+MAPK/ERK
+ - Male: 4 altered, 13 not
+ - Female: 15 altered, 193 not
+ 
+ 
+ 
+```{r}
+ Mapk_Male <- c(4,13)
+ Mapk_Female <- c(15,193)
+ tab <- cbind(Mapk_Male,Mapk_Female)
+ fisher.test(tab, alternative = "two.sided")
+```
+Here the p-value is equal to "0.04272", and therefore at a significance value of alpha = 0.05, we can reject the null hypothesis in favour of the alternative. Therefore gene's involved in the MAPK/ERK pathway between the male and famle population groups have differing mutational profiles, with a greater mutational rate in males as is evident from the initial data. 
+
+**Question 3 - Conclusion**
+The "PI3K/Akt/mTOR" and "MAPK/ERK" both yielded statistical significance between the male and female populations, whereby the rate of mutation was accelerated in females in the "PI3K/Akt/mTOR" pathway, but mutations were more prevalent in males in the "MAPK/ERK" pathway. Therefore, based on this data, the "MAPK/ERK" pathway" seems to be an alternative potential therapeutic option, as this pathway already appears to be dysregulated for male patients with luminal A breast cancer.

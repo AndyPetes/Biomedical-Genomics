@@ -1,0 +1,209 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# **Assignment 1**
+
+Name: Andrew Peters  
+ID: 17232658  
+Module: "Statistical Computing with R"  
+Date: 21/09/2017
+
+***
+
+### **Question 1(a)**
+
+Mean & Standard Deviation of "Inflamed Sample" equal "340" and "85" respectively.    
+Mean & Standard Deviation of "Non Inflamed Sample" equal "120" and "75" respectively.  
+Three simulated experimentss were created 
+
+
+```{r}
+inflamed_3 <- rnorm(3,340,85)
+non_inflamed_3 <- rnorm(3,120,75)
+```
+
+
+####Print out values for each dataset
+
+
+```{r}
+inflamed_3
+non_inflamed_3
+```
+
+
+### **Question 1(b)**
+####Perform boxplot for all each case experiment
+
+```{r}
+boxplot(inflamed_3,non_inflamed_3, xlab='Conditions',ylab='Abundance',ylim=c(0, 600))
+axis(1,at=1:2,labels=c("Inflamed","Non Inflamed"))
+title(main="Boxplots for Simulated Abundance of Bacterial Species in Colon")
+```
+
+Based on the box plot, there is a major difference in the values generated between the "Inflamed" and "Non Inflamed" samples. I would therefore estimate that this difference is statistically significanct.   
+The "box's" on the plot appear narrow, probably due to the lack of replicates taken.
+
+### **Question 1(c)**  
+
+Perform t-test to test the null hypothesis that the bacterial abundance is not statistically different between the inflamed and non-inflamed conditions. However, this requires use of the "F-test" in order to see which t-test to implement.
+
+
+```{r}
+var.test(inflamed_3, non_inflamed_3)
+```
+
+
+The F-Test is significant as indicated by the p-value < 0.05 (significance level)
+
+####Therefore perform Welch t-test
+
+```{r}
+t.test(inflamed_3,non_inflamed_3)
+```
+
+The t-test is not significantly different as the p-value > 0.05
+
+On first viewing, the results seemed significantly different, however after the t statistic was calculated, this was not the case. This could be because the number experiments repeated (n=3) is small, and therefore should be repeated many more times to gain more certain and relaible data. 
+
+***
+
+### **Question 2(a)**
+
+####Five simulated experimentss were created
+
+```{r}
+inflamed_5 <- rnorm(5,340,85)
+non_inflamed_5 <- rnorm(5, 120, 75)
+```
+
+####Print out values for each dataset
+
+```{r}
+inflamed_5
+non_inflamed_5
+```
+
+### **Question 2(b)**
+
+####Perform boxplot for all each case experiment
+
+```{r}
+boxplot(inflamed_5,non_inflamed_5, xlab='Conditions',ylab='Abundance',ylim=c(0, 600))
+axis(1,at=1:2,labels=c("Inflamed","Non Inflamed"))
+title(main="Boxplots for Simulated Abundance of Bacterial Species in Colon")
+```
+
+I still feel that these samples have a statistcally significant difference. This may be more apparent in this test as there are more replicates undertaken.
+
+The "box's" appear broader, probably due to more experimental replicates.
+ 
+### **Question 2(c)**
+
+Perform t-test to test the null hypothesis that the bacterial abundance is not statistically different between the inflamed and non-inflamed conditions. However, this requires use of the "F-test" in order to see which t-test to implement.
+
+```{r}
+var.test(inflamed_5, non_inflamed_5)
+
+```
+
+The F-Test isn't significant as indicated by a large p-value > 0.05 (significance level)
+
+###Therefore perform Student t-test
+
+```{r}
+t.test(inflamed_5,non_inflamed_5,pair=TRUE)
+```
+
+The t-test is significantly different as the p-value > 0.05, indicating that the two datasets are significantly different.   
+This is probably becasue with increasing experimental replicates, data is more reliable resulting in more certain conclusions drawn.
+
+***
+
+### **Question 3(a)**
+
+####20 simulated experimentss were created
+
+```{r}
+inflamed_20 <- rnorm(20,340,85)
+non_inflamed_20 <- rnorm(20,120,75)
+```
+
+####Print out values for each dataset
+
+```{r}
+inflamed_20
+non_inflamed_20
+```
+
+###**Question 3(b)**
+####Perform boxplot for all each case experiment
+
+```{r}
+boxplot(inflamed_20,non_inflamed_20, xlab='Conditions',ylab='Abundance',ylim=c(0, 600))
+axis(1,at=1:2,labels=c("Inflamed","Non Inflamed"))
+title(main="Boxplots for Simulated Abundance of Bacterial Species in Colon")
+```
+
+I feel that these samples will have a statistcally significant difference. This is because many replicates are used.   
+The "box's" appear broader again, probably due to more experimental replicates and greater statistical certainty.
+
+###**Question 3(c)**
+
+Perform t-test to test the null hypothesis that the bacterial abundance is not statistically different between the inflamed and non-inflamed conditions. However, this requires use of the "F-test" in order to see which t-test to implement.
+
+```{r}
+var.test(inflamed_20, non_inflamed_20)
+```
+
+The F-Test isn't significant as indicated by a large p-value > 0.05 (significance level)   
+
+###Therefore perform Student t-test
+
+```{r}
+t.test(inflamed_20,non_inflamed_20,pair=TRUE)
+```
+
+The t-test is significantly different as the p-value > 0.05, indicating that the two datasets are significantly different.     
+
+This is probably becasue with increasing experimental replicates, data is more reliable resulting in more certain conclusions drawn.  
+
+As the experiments were repeated more times, it was with greater certainty that difference between the two datasets was statistically significant as indicated by the declining "p-values" with the progression of incereasing experiments. I'd imagine, this is due to more relaible data being produced by the computer software with increased experimentation (high "n" values), as with more experiments, the data better approximates the normal distribution and therefore more concrerte conclusions can be drawn.  
+
+####Tabulate the resulting p-values as a function of replicates. First extrapolate p-values
+
+```{r}
+pvalue3 <- t.test(inflamed_3,non_inflamed_3)$p.value
+pvalue5 <- t.test(inflamed_5, non_inflamed_5,pair =TRUE)$p.value
+pvalue20 <- t.test(inflamed_20, non_inflamed_20,pair =TRUE)$p.value
+
+replicates <- c(3,5,20)
+p_values <- c(pvalue3,pvalue5,pvalue20)
+```
+
+####Create Significance parameter
+
+```{r}
+significance <- p_values<= 0.05
+```
+
+####Create Table
+```{r}
+table <- data.frame(replicates,p_values,significance)
+```
+
+
+####Print table
+
+```{r} 
+library(knitr)
+kable(table, caption = "**Results**")
+```
+
+***
+
+###**Conclusions:**
+
+Many conclusions have been discussed during the report, as the data has been manipulated. However, overall there is greater statistical power with more repeated experiments and the corresponding "P-value"" declines indicating a strong statistical significance. This indicates that with more experimental replicates the  abundance of a bacterial species from inflamed colon epithelial cells, and from non-inflamed epithelial cells, are in fact significantly different.
